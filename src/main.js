@@ -723,11 +723,9 @@ function onGizmoSelectStart(event) {
   gizmoRaycaster.set(rayOg, rayDir);
 
   // Debugging
-  /*
   const debugLine = new THREE.ArrowHelper(rayDir, rayOg, 2, 0xffff00);
   scene.add(debugLine);
-  setTimeout(() => scene.remove(debugLine), 2000);
-  */
+  setTimeout(() => scene.remove(debugLine), 1000);
 
   const intersections = gizmoRaycaster.intersectObjects(gizmoAxes, false);
   if(intersections.length === 0) return;
