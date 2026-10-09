@@ -1,0 +1,66 @@
+P01
+Joystick
+2.07 seg
+0m16 m
+
+2.36 seg
+0.14 m
+
+7.03 seg
+0.34 m
+
+WIM
+4.08 seg
+0.09 m
+
+2.97 seg
+0.48 m
+
+4.40 seg
+0.35 m
+
+
+
+P02
+WIM
+7.61 seg
+0.31 m
+
+6.96 seg
+0.04 m
+
+4.68 seg
+0.12 m
+
+Joystick
+12.51 seg
+0.38 m
+
+5.90 seg
+0.64 m
+
+12.96 seg
+0.32 m
+
+
+
+P03
+Joystick
+4.74 seg
+0.23 m
+
+4.33 seg
+0.41 m
+
+6.47 seg
+0.35 m
+
+WIM
+4.66 seg
+0.17m
+
+3.48 seg
+0.28 m
+
+4.24 seg
+0.43 m
