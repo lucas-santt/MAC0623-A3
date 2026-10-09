@@ -8,8 +8,50 @@ let grip0, grip1;
 let mini, marker;
 let isDraggingMarker = false;
 
-const DEBUG_WIM_LINE = true;
+const DEBUG_WIM_LINE = false;
 let debugLine = null;
+
+function addBox(group, width, height, depth, x, y, z, color) {
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(width, height, depth),
+    new THREE.MeshStandardMaterial({ color })
+  );
+  mesh.position.set(x, y, z);
+  group.add(mesh);
+  return mesh;
+}
+
+function createHouse(world) {
+  const houseGroup = new THREE.Group();
+  world.add(houseGroup);
+
+  addBox(houseGroup, 10, 0.1, 5.0,  0.0, 0.0, -2.5, 0x2c3e50);
+  addBox(houseGroup,  5, 0.1, 5.0, -2.5, 0.0,  2.5, 0x8b5a2b);
+  addBox(houseGroup,  5, 0.1, 5.0,  2.5, 0.0,  2.5, 0xbdc3c7);
+
+  const wallColor = 0xf5f6fa;
+  addBox(houseGroup, 10.4, 2.5,  0.2,  0.0, 1.25, -5.1, wallColor); 
+  addBox(houseGroup, 10.4, 2.5,  0.2,  0.0, 1.25,  5.1, wallColor);  
+  addBox(houseGroup,  0.2, 2.5, 10.4, -5.1, 1.25,  0.0, wallColor); 
+  addBox(houseGroup,  0.2, 2.5, 10.4,  5.1, 1.25,  0.0, wallColor);
+
+  addBox(houseGroup, 3.5, 2.5, 0.2, -3.25, 1.25, 0.0, 0xaaddff);
+  addBox(houseGroup, 3.0, 2.5, 0.2,  0.0,  1.25, 0.0, 0xaaddff);
+  addBox(houseGroup, 2.5, 2.5, 0.2,  3.75, 1.25, 0.0, 0xaaddff);
+
+  addBox(houseGroup, 0.2, 2.5, 1.5, 0.0, 1.25, 0.75, wallColor);
+  addBox(houseGroup, 0.2, 2.5, 2.0, 0.0, 1.25, 4.0,  wallColor);
+
+  addBox(houseGroup, 2.5, 0.5, 3.5, -3.5, 0.25, -3.0, 0x34495e);
+  addBox(houseGroup, 2.0, 0.1, 0.8, -3.5, 0.55, -4.2, 0xffffff);
+
+  addBox(houseGroup, 1.0, 0.8, 3.0, -4.5, 0.4, 2.5, 0x8e44ad); 
+  addBox(houseGroup, 0.4, 0.6, 2.5, -0.5, 0.3, 2.5, 0x2c3e50); 
+  addBox(houseGroup, 0.1, 1.0, 2.0, -0.5, 1.1, 2.5, 0x000000);
+
+  addBox(houseGroup, 2.5, 0.9, 1.0, 2.5, 0.45, 2.5, 0xd35400);
+  addBox(houseGroup, 1.2, 2.0, 1.2, 4.2, 1.0,  0.8, 0x7f8c8d);
+}
 
 function buildScene() {
   const scene = new THREE.Scene();
@@ -23,45 +65,38 @@ function buildScene() {
   dirLight.position.set(2, 4, 3);
   scene.add(dirLight);
 
-  scene.add(new THREE.GridHelper(20, 20, 0x444444, 0x2a2a2a));
-  scene.add(new THREE.AxesHelper(0.6));
+  scene.add(new THREE.GridHelper(30, 30, 0x444444, 0x2a2a2a));
 
-  const pillar = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.5, 0.5, 3),
-    new THREE.MeshStandardMaterial({ color: 0xcc0000 })
-  );
-  pillar.position.set(3, 1.5, -4);
-  world.add(pillar);
-
-  // Walls
-  const blueWall = new THREE.Mesh(
-    new THREE.BoxGeometry(4, 2, 0.5),
-    new THREE.MeshStandardMaterial({ color: 0x0000cc })
-  );
-  blueWall.position.set(-4, 1, -5);
-  world.add(blueWall);
-  
-  const yellowWall = new THREE.Mesh(
-    new THREE.BoxGeometry(5, 2, 0.5),
-    new THREE.MeshStandardMaterial({ color: 0xcccc00 })
-  );
-  yellowWall.position.set(0, 1, 6);
-  world.add(yellowWall);
+  createHouse(world);
 
   // Beacon (Waypoint)
-  const beaconGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.1);
+  const beaconGroup = new THREE.Group();
+  beaconGroup.name = 'beacon';
+  
   const beaconMaterial = new THREE.MeshStandardMaterial({
     color: 0x00dd00,
     transparent: true,
     opacity: 0.6,
     emissive: 0x005500
   });
-  const beacon = new THREE.Mesh(beaconGeometry, beaconMaterial);
-  beacon.position.set(0, 0.05, 0);
-  beacon.name = 'beacon';
-  world.add(beacon);
 
-  return { scene, world, target: beacon };
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.5), beaconMaterial);
+  pole.position.y = 1.25;
+  beaconGroup.add(pole);
+
+  const outerRing = new THREE.Mesh(new THREE.TorusGeometry(CONFIRM_RADIUS, 0.05, 16, 64), beaconMaterial);
+  outerRing.rotation.x = -Math.PI / 2;
+  outerRing.position.y = 0.05;
+  beaconGroup.add(outerRing);
+
+  const innerRing = new THREE.Mesh(new THREE.TorusGeometry(CONFIRM_RADIUS * 0.5, 0.03, 16, 64), beaconMaterial);
+  innerRing.rotation.x = -Math.PI / 2;
+  innerRing.position.y = 0.05;
+  beaconGroup.add(innerRing);
+
+  world.add(beaconGroup);
+
+  return { scene, world, target: beaconGroup };
 }
 
 function main() {
@@ -71,7 +106,7 @@ function main() {
   scene.add(rig);
 
   camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.05, 100);
-  camera.position.set(0, 1.4, 2);
+  camera.position.set(0.0, 1.6, 2);
   camera.lookAt(0, 0.5, 0);
   rig.add(camera);
 
@@ -112,9 +147,9 @@ function main() {
 // ---------------------------------------------------------------------------
 
 const TARGET_BOUNDS = {
-  x: [-8.0, 8.0],
-  y: [0.05, 0.05],
-  z: [-8.0, 8.0],
+  x: [-4.0, 4.0],
+  y: [ 0.0, 0.0],
+  z: [-4.0, 4.0],
 };
 
 function randomInRange([min, max]) {
@@ -227,6 +262,33 @@ function confirmTrial() {
   startTrial();
 }
 
+let aButtonWasPressed = false;
+
+function checkVRConfirmButton() {
+  const session = renderer.xr.getSession();
+  if (!session) return; 
+
+  let aButtonPressedNow = false;
+
+  for (const source of session.inputSources) {
+    const gp = source.gamepad;
+    if (!gp) continue;
+    
+    if (gp.buttons[4] && gp.buttons[4].pressed) {
+      aButtonPressedNow = true;
+    }
+  }
+
+  if (aButtonPressedNow && !aButtonWasPressed) {
+    const { withinTolerance } = checkTolerance();
+    if (withinTolerance) {
+      confirmTrial();
+    }
+  }
+
+  aButtonWasPressed = aButtonPressedNow;
+}
+
 confirmBtn.addEventListener("click", confirmTrial);
 window.addEventListener("keydown", handleKeydown);
 window.addEventListener("keyup", handleKeyUp);
@@ -283,10 +345,19 @@ function handleDownloadClick() {
 function updateStatus() {
   const { positionError, orientationErrorDeg, withinTolerance } = checkTolerance();
 
-  statusEl.textContent = `Dist: ${positionError.toFixed(2)}m`;
+  if (withinTolerance) {
+    statusEl.textContent = `Dist: ${positionError.toFixed(2)}m | (Aperte A para o próximo)`;
+  } else {
+    statusEl.textContent = `Dist: ${positionError.toFixed(2)}m`;
+  }
   statusEl.classList.toggle("in-tolerance", withinTolerance);
 
-  target.material.emissive.setHex(withinTolerance ? 0x00cc00 : 0x005500);
+  const emmissiveColor = withinTolerance ? 0x00cc00 : 0x005500;
+  target.traverse((child) => {
+    if (child.isMesh && child.material) {
+      child.material.emissive.setHex(emmissiveColor);
+    }
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -385,50 +456,88 @@ function onWIMRelease(event) {
   rig.position.z += targetWorldPos.z - tmpCameraPos.z;
 }
 
+const joystickForward = new THREE.Vector3();
+const joystickRight = new THREE.Vector3();
+const JOYSTICK_SPEED = 2.5;
+const JOYSTICK_DEADZONE = 0.05;
+
 function updateControlMapping(delta) {
-  if(!mappingSelect || mappingSelect.value !== "1") {
-    if(debugLine) debugLine.visible = false;
-    return;
+  const mapping = mappingSelect ? mappingSelect.value : "1";
+
+  if(mini) mini.visible = (mapping === "1");
+  if(debugLine) debugLine.visible = (mapping === "1" && DEBUG_WIM_LINE);
+
+  if(mapping === "1") {
+    if(!mini || !marker) return;
+
+    if(!isDraggingMarker) {
+      camera.getWorldPosition(tmpCameraPos);
+      world.worldToLocal(tmpCameraPos);
+      marker.position.set(tmpCameraPos.x, 0, tmpCameraPos.z);
+    }
+
+    if(!controller1) return;
+
+    const ctrlWorldPos = new THREE.Vector3();
+    controller1.getWorldPosition(ctrlWorldPos);
+
+    const markerWorldPos = new THREE.Vector3();
+    marker.getWorldPosition(markerWorldPos);
+
+    const dist = ctrlWorldPos.distanceTo(markerWorldPos);
+
+    if(ctrlWorldPos.distanceTo(markerWorldPos) < 0.1) {
+      console.log("Controller is close to marker");
+      marker.material.color.setHex(0xff3333);
+      marker.material.emissive.setHex(0x550000);
+    } else {
+      console.log("Controller is far from marker, distance:", dist.toFixed(3));
+      marker.material.color.setHex(0x990000);
+      marker.material.emissive.setHex(0x000000);
+    }
+
+    if(!DEBUG_WIM_LINE || !debugLine) return;
+
+    debugLine.visible = true;
+
+    const positions = debugLine.geometry.attributes.position.array;
+
+    positions[0] = markerWorldPos.x;
+    positions[1] = markerWorldPos.y;
+    positions[2] = markerWorldPos.z;
+      
+    positions[3] = ctrlWorldPos.x;
+    positions[4] = ctrlWorldPos.y;
+    positions[5] = ctrlWorldPos.z;
+      
+    debugLine.geometry.attributes.position.needsUpdate = true;
   }
-  if(!mini || !marker) return;
 
-  if(!isDraggingMarker) {
-    camera.getWorldPosition(tmpCameraPos);
-    world.worldToLocal(tmpCameraPos);
-    marker.position.set(tmpCameraPos.x, 0, tmpCameraPos.z);
+  else if (mapping === "2") {
+    const session = renderer.xr.getSession();
+    if (!session) return;
+
+    for (const source of session.inputSources) {
+      if (source.handedness === 'left' && source.gamepad) {
+        const xAxis = source.gamepad.axes[2];
+        const yAxis = source.gamepad.axes[3];
+
+        if (Math.abs(xAxis) > JOYSTICK_DEADZONE || Math.abs(yAxis) > JOYSTICK_DEADZONE) {
+          camera.getWorldDirection(joystickForward);
+          joystickForward.y = 0;
+          joystickForward.normalize();
+
+          joystickRight.set(-joystickForward.z, 0, joystickForward.x);
+
+          const moveZ = yAxis * JOYSTICK_SPEED * delta;
+          const moveX = xAxis * JOYSTICK_SPEED * delta;
+
+          rig.position.addScaledVector(joystickForward, -moveZ);
+          rig.position.addScaledVector(joystickRight, moveX);
+        }
+      }
+    }
   }
-
-  if(!controller1) return;
-
-  const ctrlWorldPos = new THREE.Vector3();
-  controller1.getWorldPosition(ctrlWorldPos);
-
-  const markerWorldPos = new THREE.Vector3();
-  marker.getWorldPosition(markerWorldPos);
-
-  if(ctrlWorldPos.distanceTo(markerWorldPos) < 0.1) {
-    marker.material.color.setHex(0xff3333);
-    marker.material.emissive.setHex(0x550000);
-  } else {
-    marker.material.color.setHex(0x990000);
-    marker.material.emissive.setHex(0x000000);
-  }
-
-  if(!DEBUG_WIM_LINE || !debugLine) return;
-
-  debugLine.visible = true;
-
-  const positions = debugLine.geometry.attributes.position.array;
-
-  positions[0] = markerWorldPos.x;
-  positions[1] = markerWorldPos.y;
-  positions[2] = markerWorldPos.z;
-    
-  positions[3] = ctrlWorldPos.x;
-  positions[4] = ctrlWorldPos.y;
-  positions[5] = ctrlWorldPos.z;
-    
-  debugLine.geometry.attributes.position.needsUpdate = true;
 }
 
 // ---------------------------------------------------------------------------
@@ -440,6 +549,8 @@ const clock = new THREE.Clock();
 function animate() {
   const delta = clock.getDelta();
   updateControlMapping(delta);
+
+  checkVRConfirmButton();
 
   camera.getWorldPosition(tmpCameraPos);
   pathLength += tmpCameraPos.distanceTo(lastCameraPosition);
