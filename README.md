@@ -8,11 +8,11 @@ Then, in a web browser, type in `http://0.0.0.0:8000/`
 
 # Github repository
 
-https://github.com/lucas-santt/MAC0623-A2
+https://github.com/lucas-santt/MAC0623-A3
 
 # Github pages
 
-https://lucas-santt.github.io/MAC0623-A2/
+https://lucas-santt.github.io/MAC0623-A3
 
 # Design options
 
